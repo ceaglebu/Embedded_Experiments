@@ -1,6 +1,5 @@
 // ------------------------------------ //
 // IMPROVED 2 SERVO PROGRAM             //
-// USE INTERRUPTS TO FREE PROCESSOR     //
 // USE STATE MACHINE DESIGN PRINCIPLES  //
 // ADD STOP / START BUTTON              //
 // ------------------------------------ //
@@ -10,9 +9,16 @@
 //  |=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=|
 //  | STATES                              |
 //  | - 0 : Servos off                    |
-//  | - 1 : Servo  on, long arm queued    |
-//  | - 2 : Active Servo Switching        |
+//  | - 1 : Servo on                      |
+//  | - 2 : Servo Switching               |
 //  |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
+
+//  |=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=|
+//  | EVENTS                              |
+//  | - 0 : Start/Stop Button             |
+//  | - 1 : Switch Button                 |
+//  |-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
+
 #include "two_servos_state_machine.h"
 
 #define SERVO_SPEED (1)
@@ -70,31 +76,6 @@ void switching_handler(StateMachine* FSM, Conditions* conditions) {
     return;
 }
 
-// volatile bool start_stop_button_down = false;
-// volatile bool start_stop_button_pressed = false;
-// volatile bool switch_button_down = false;
-// volatile bool switch_button_pressed = false;
-
-// //TODO: Use a static variable to track when the button was initially pressed. 
-// // Plan: - Activate interrupt on up and down
-// //       - keep track if button is up or down (switch every time there is valid interrupt)
-// //       - interrupt is not valid if another interrupt happened too recently
-
-// ISR(INT0_vect) {
-//     // If button is down: turn off button
-//     // If button is not down: turn button on, start timer
-//     switch_button_down = !switch_button_down
-//     if (switch_button_down) {
-        
-//     }
-//     event = SWITCH;
-//     PORTB ^= _BV(PORTB5);
-// }
-
-// ISR(INT1_vect) {
-//     event = START_STOP;
-// }
-
 int main (void) {
 
     // Setup GPIO pins for buttons and servos
@@ -119,11 +100,6 @@ int main (void) {
 
     Servo_write(&short_arm, short_arm.angle_deg);
     Servo_write(&long_arm, long_arm.angle_deg);
-
-    // Set up Interrupts
-    // sei();
-    // EIMSK |= _BV(INT1) | _BV(INT0); // Interrupt mask for external interrupts
-    // EICRA |= _BV(ISC10) | _BV(ISC00); // Rising and Falling edge detection (use to determine length of button press)
 
     // Initialize state machine
     StateTable state_lookup = {
@@ -170,5 +146,3 @@ int main (void) {
         (*(state_handlers[FSM.state]))(&FSM, &conditions);
     }
 }
-
-// BUGS: starting in on mode, pressing start button switches active motor.
