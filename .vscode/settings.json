@@ -1,0 +1,13 @@
+{
+    "C_Cpp.default.compilerPath": "c:\\avr-gnu\\avr8-gnu-toolchain-win32_x86_64\\bin\\avr-gcc.exe",
+    "files.associations": {
+        "io.h": "c",
+        "iom328p.h": "c",
+        "interrupt.h": "c",
+        "iom3250pa.h": "c",
+        "iom3250p.h": "c",
+        "stdbool.h": "c",
+        "delay.h": "c",
+        "two_servos_state_machine.h": "c"
+    }
+}
