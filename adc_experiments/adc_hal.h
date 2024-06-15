@@ -1,4 +1,5 @@
 // ADC Hardware abstraction layer - reusable mini library to get ADCs working
+// Interrupts must be enabled
 #ifndef __AVR_ATmega328P__
 #define __AVR_ATmega328P__
 #endif

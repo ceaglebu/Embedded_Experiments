@@ -11,7 +11,7 @@ int main(void) {
     sei();
 
     adc_init();
-    ADC_selection adc_selection = ADC_0;
+    ADC_selection adc_selection = ADC_1;
     adc_enable_pin(adc_selection);
     adc_select_pin(adc_selection);
     assert(adc_get_active_pin() == adc_selection);
@@ -22,7 +22,7 @@ int main(void) {
 
     while (true) {
         voltage = adc_read();
-        if (voltage > 500 && adc_get_active_pin() == ADC_0) {
+        if (voltage > 500) {
             PORTB |= _BV(PORTB5);
         } else {
             PORTB &= ~_BV(PORTB5);

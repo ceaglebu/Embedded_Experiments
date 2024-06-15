@@ -9,7 +9,7 @@ CFLAGS= -Os -DF_CPU=16000000UL -mmcu=atmega328p
 # -mmcu=atmega328p chooses microprocessor out of available avr-gccs
 
 %.out: %.c
-	$(CC) $(CFLAGS) $(EXTRAFILES) $< -o $@
+	$(CC) $(CFLAGS) adc_hal.c $< -o $@
 
 %.hex: %.out
 	$(OBJCOPY) -O ihex -R .eeprom $< $@
