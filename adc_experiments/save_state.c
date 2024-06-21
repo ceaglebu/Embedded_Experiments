@@ -25,7 +25,7 @@ typedef enum {WRITE, READ, SAVING, last_state} state;
 typedef enum {SWITCH, SAVE, last_event} event;
 
 volatile state current_state = WRITE;
-volatile state current_event = last_event;
+volatile event current_event = last_event;
 
 volatile bool state_transition = false;
 
@@ -54,8 +54,6 @@ int main(void) {
     // Set up buttons for input, servos for output
     DDRD &= ~(_BV(DDD2) | _BV(DDD3));
     DDRD |= _BV(DDD5) | _BV(DDD6);
-    DDRB |= _BV(PORTB5);
-    PORTB &= ~_BV(PORTB5);
 
     // Set up Fast PWM on timer 0 for servos
 
@@ -98,13 +96,8 @@ int main(void) {
         } else if (!(PIND & _BV(PIND2)) && switch_down) {
             switch_down = false;
         }
-        
-        if (current_event == SWITCH) {
-            PORTB |= _BV(PORTB5);
-        } else {
-            PORTB &= ~_BV(PORTB5);
-        }
 
+        
         switch (current_state)
         {
         case WRITE:
