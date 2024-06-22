@@ -40,7 +40,8 @@ void serial_send_char(char character) {
     
     if (new_tx) {
         uart_start_tx();
-        // Clear and enable serial transmission available interrupt
+        // Clear and enable serial transmission available interrupt.
+        // Needs to happen after serial transmission initaited, or else ISR will always run
         UCSR0A &= ~_BV(UDRE0);
         UCSR0B |= _BV(UDRIE0);
     }

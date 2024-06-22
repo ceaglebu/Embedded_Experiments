@@ -8,11 +8,11 @@ CFLAGS= -Os -DF_CPU=16000000UL -mmcu=atmega328p
 # -DF_CPU=16000000UL sets clock to 16MHz
 # -mmcu=atmega328p chooses microprocessor out of available avr-gccs
 
-# detect what port arduino is on
-# might have to change if 2 are connected
+LIBRARIES:= $(wildcard lib/*/)
+LIB_SRC:= $(filter-out $(wildcard lib/*/test*.c), $(foreach lib, $(LIBRARIES), $(filter-out ($wildcard $(lib)test*.c), $(wildcard $(lib)*.c))))
 
-%.out: %.c lib\serial_hal\serial_hal.c lib\ring_buffer\ring_buffer.c
-	$(CC) $(CFLAGS) lib\ring_buffer\ring_buffer.c lib\serial_hal\serial_hal.c $< -o $@
+%.out: %.c
+	$(CC) $(CFLAGS) $(LIB_SRC) $< -o $@
 
 %.hex: %.out
 	$(OBJCOPY) -O ihex -R .eeprom $< $@
