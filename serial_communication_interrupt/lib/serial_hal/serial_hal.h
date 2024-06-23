@@ -13,4 +13,6 @@ void serial_begin();
 void serial_send_char(char character);
 void serial_send_string(const char message[]);
 volatile uint8_t serial_read_char();
+// Go into power save mode while waiting for next transmission
+volatile uint8_t serial_read_char_sleep(uint8_t mode_vector);
 void serial_attach(volatile uint8_t*);

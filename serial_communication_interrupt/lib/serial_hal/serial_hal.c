@@ -42,6 +42,10 @@ ISR(USART_RX_vect) {
     PORTB |= _BV(PORTB5);
 }
 
+ISR(PCINT2_vect){
+    // PORTB ^= _BV(PORTB5);
+}
+
 void serial_begin() {
     UBRR0 = BAUDRATE_BYTES;
     // enable TX (and RX in future)
@@ -75,6 +79,30 @@ void serial_send_string(const char message[]) {
 volatile uint8_t serial_read_char() {
     request_read = true;
     while (request_read);
+    return read_data;
+}
+
+volatile uint8_t serial_read_char_sleep(uint8_t mode_vector) {
+    // Flag to tell if message received since requesting a read
+    request_read = true;
+
+    // Enable pin 16 (D0 / RX pin) interrupt so it wakes when receiving message
+    bool PCINT16_before = PCMSK2 & _BV(PCINT16);
+    bool PCIE2_before = PCICR & _BV(PCIE2);
+    PCMSK2 |= _BV(PCINT16);
+    PCICR |= _BV(PCIE2);
+
+    //Put mc to sleep
+    set_sleep_mode(mode_vector);
+    sleep_enable();
+    while (request_read) {
+        sleep_cpu(); // Go back to sleep as long as message hasn't been received
+    }
+    sleep_disable();
+
+    // Revert pin 16 interrupt settings
+    PCMSK2 |= PCINT16_before << PCINT16;
+    PCICR |= PCIE2_before << PCIE2;
     return read_data;
 }
 

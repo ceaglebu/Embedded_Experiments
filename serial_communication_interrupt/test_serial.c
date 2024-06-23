@@ -17,8 +17,8 @@ int main(void) {
 
 
     while(1) {
-        serial_send_char(serial_read_char());
-        // PORTB ^= _BV(PORTB5);
+        serial_send_char(serial_read_char_sleep(0b011));
+        PORTB ^= _BV(PORTB5);
     }
 
 }
