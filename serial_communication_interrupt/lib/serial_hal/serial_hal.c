@@ -1,13 +1,16 @@
 #include "serial_hal.h"
 #include "..\ring_buffer\ring_buffer.h"
 #include <avr/interrupt.h>
-#include <assert.h>
 
 #define BAUDRATE_BYTES (103)
 
 #define RING_BUFFER_SIZE (16)
 uint8_t buffer[RING_BUFFER_SIZE];
 ring_buffer transmit_buffer = (ring_buffer) {.buffer = buffer, .size = RING_BUFFER_SIZE};
+
+volatile bool request_read = false;
+volatile uint8_t read_data = 'a';
+volatile volatile uint8_t * attached_data = NULL;
 
 static void uart_start_tx() {
     if (!ring_buffer_empty(&transmit_buffer)){
@@ -25,12 +28,28 @@ ISR(USART_UDRE_vect) {
     }
 }
 
+ISR(USART_RX_vect) {
+    // Only care about data sent when listening. Other data is tossed out to clear interrupt.
+    // request_read means serial_read_char was called.
+    // attached_data != NULL means a variable was attached to represent serial receipts.
+    read_data = UDR0;
+    if (request_read) {
+        request_read = false;
+    }
+    if (attached_data != NULL) {
+        *attached_data = read_data;
+    }
+    PORTB |= _BV(PORTB5);
+}
+
 void serial_begin() {
     UBRR0 = BAUDRATE_BYTES;
     // enable TX (and RX in future)
-    UCSR0B |= _BV(TXEN0);
+    UCSR0B |= _BV(TXEN0) | _BV(RXEN0);
     // Set 8 bit length
-    UCSR0B |= (3 << UCSZ00);
+    UCSR0C |= (3 << UCSZ00);
+    // Enable receiving interrupt
+    UCSR0B |= _BV(RXCIE0);
 }
 
 void serial_send_char(char character) {
@@ -51,4 +70,14 @@ void serial_send_string(const char message[]) {
     for (size_t idx_char = 0; message[idx_char] != '\0'; idx_char += 1) {
         serial_send_char(message[idx_char]);
     }
+}
+
+volatile uint8_t serial_read_char() {
+    request_read = true;
+    while (request_read);
+    return read_data;
+}
+
+void serial_attach(volatile uint8_t * data) {
+    attached_data = data;
 }

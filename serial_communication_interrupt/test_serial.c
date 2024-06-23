@@ -6,6 +6,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+volatile uint8_t attach = 0;
+
 int main(void) {
     serial_begin();
 
@@ -13,10 +15,10 @@ int main(void) {
 
     sei();
 
+
     while(1) {
-        serial_send_string("Hello embedded\n");
-        PORTB ^= _BV(PORTB5);
-        _delay_ms(500);
+        serial_send_char(serial_read_char());
+        // PORTB ^= _BV(PORTB5);
     }
 
 }
