@@ -1,0 +1,2 @@
+# Arduino_LCD
+Basic LCD test with Arduino. Made to understand available features of the LCD using the I2C -> LCD converter and look at how the drivers work. Also used to generate I2C signals to analyze using a logic analyzer.
