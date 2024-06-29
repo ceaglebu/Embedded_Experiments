@@ -1,3 +1,6 @@
+// Interrupt-based I2C transmission.
+// Can send multiple bytes. More structured than polling test.
+
 #define __AVR_ATmega328P__
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -13,7 +16,7 @@ typedef struct {
     volatile size_t progress_idx;
 } data_packet;
 
-volatile enum {START, ADDR, DATA, STOP} state;
+volatile enum {START, ADDR, DATA, STOP} state = STOP;
 volatile data_packet current_data = (data_packet) {
     .addr = 0,
     .data = NULL,
@@ -22,7 +25,7 @@ volatile data_packet current_data = (data_packet) {
 };
 
 void i2c_transmit(data_packet* a_data) {
-    while(state != STOP); // Wait for current transmission to finish. This probably should be a buffer
+    while(state != STOP); // Wait for current transmission to finish. This probably should be a buffer instead to avoid hangs.
     current_data = *a_data; 
 
     state = START;
@@ -104,16 +107,6 @@ int main (void) {
 
     // Activate pull up resistors
     PORTC |= _BV(PORTC5) | _BV(PORTC4);
-
-
-    // Setup Globals
-    state = STOP;
-    current_data = (data_packet) {
-        .addr = 0,
-        .data = NULL,
-        .data_len = 0,
-        .progress_idx = 0
-    };
 
     // Enable interrupts
     sei();
