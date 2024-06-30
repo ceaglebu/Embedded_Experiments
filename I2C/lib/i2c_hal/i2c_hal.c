@@ -1,8 +1,5 @@
 #include "i2c_hal.h"
 
-// Optimizations to make
-// - try inlines
-
 static inline void send_start_signal();
 static inline void send_address(uint8_t addr);
 static inline void send_byte(uint8_t byte); 
@@ -28,7 +25,6 @@ volatile state current_state = (volatile state) {
 uint8_t single_byte_register; // Single byte transmission buffer so after transmit_byte's stack is cleared, single byte can still exist
 
 ISR(TWI_vect) {
-    PORTB |= _BV(PORTB5);
     switch (current_state.transmit_state) {
         case START:
             // Start bit sent, send address
@@ -96,23 +92,23 @@ bool i2c_transmit_bytes(uint8_t addr, uint8_t * a_data, size_t len_data) {
     while (current_state.transmit_state != STOP);
 }
 
-static void send_start_signal() {
+static inline void send_start_signal() {
     TWCR = _BV(TWINT) | _BV(TWSTA) | _BV(TWEN) | _BV(TWIE);
 }
 
-static void send_address(uint8_t addr) {
+static inline void send_address(uint8_t addr) {
     send_byte(addr << 1);
 }
 
-static void send_byte(uint8_t data) {
+static inline void send_byte(uint8_t data) {
     TWDR = data;
     TWCR = _BV(TWINT) | _BV(TWEN) | _BV(TWIE);
 }
 
-static void send_stop_signal() {
+static inline void send_stop_signal() {
     TWCR = _BV(TWINT) | _BV(TWSTO) | _BV(TWEN) | _BV(TWIE);
 }
 
-static uint8_t get_status_code() {
+static inline uint8_t get_status_code() {
     return TWSR & 0xF8;
 }
