@@ -1,5 +1,14 @@
 // ADC Hardware abstraction layer - reusable mini library to get ADCs working
-// Interrupts must be enabled
+
+/*********************************** INSTRUCTIONS *****************************************/ 
+/* 1. Global interrupts must be enabled                                                   */
+/* 2. adc_init()                                                                          */
+/* 3. adc_enable(ADC_X)     /* for all ADCs that will be used                             */
+/* 4. adc_select_pin(ADC_X) /* select what ADC adc_read() will read                       */
+/* 5. adc_read(ADC_X)       /* returns value 0-1023 from selected adc                     */
+/* 6. adc_get_active_pin()  /* if needed - returns ADC_selection of selected / active ADC */
+/******************************************************************************************/ 
+
 #ifndef __AVR_ATmega328P__
 #define __AVR_ATmega328P__
 #endif
