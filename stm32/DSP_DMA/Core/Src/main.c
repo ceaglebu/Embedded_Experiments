@@ -49,11 +49,12 @@ DMA_HandleTypeDef hdma_dac1;
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-uint16_t adc_buffer[BUFFER_SIZE];
+volatile uint16_t adc_buffer[BUFFER_SIZE];
 volatile uint16_t adc_buffer_pointer = 0;
 
-uint16_t dac_buffer[BUFFER_SIZE];
+volatile uint32_t dac_buffer[BUFFER_SIZE];
 volatile uint16_t dac_buffer_pointer = 0;
+
 
 volatile bool data_ready = false;
 /* USER CODE END PV */
@@ -91,14 +92,20 @@ void apply_effect() {
 
 	for (int idx_datapoint = 0; idx_datapoint < BUFFER_SIZE / 2; idx_datapoint++) {
 		// convert adc data to float
-		input = ((float) 1 / 4096) * adc_buffer[adc_buffer_pointer + idx_datapoint];
+		input = ((float) 2 / 4096) * adc_buffer[adc_buffer_pointer + idx_datapoint] - 1;
 
 		// process adc data
-		output = input;
+		output = input / 2;
+		output = input * 2;
+		if (output > .2) {
+			output = .2;
+		} else if (output < -.2) {
+			output = -.2;
+		}
 
 		// convert data back to unsigned int
 		// set dac buffer to filtered adc data
-		dac_buffer[dac_buffer_pointer + idx_datapoint] = (4096 * output);
+		dac_buffer[dac_buffer_pointer + idx_datapoint] = (2048 * (output + 1));
 	}
 
 
@@ -141,10 +148,11 @@ int main(void)
   MX_TIM2_Init();
   MX_DAC_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start(&htim2);
-
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *) adc_buffer, BUFFER_SIZE);
   HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t *) dac_buffer, BUFFER_SIZE, DAC_ALIGN_12B_R);
+  //HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 1000);
+
+  HAL_TIM_Base_Start(&htim2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -154,7 +162,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if (data_ready) {
+ 	  if (data_ready) {
 		  apply_effect();
 	  }
   }
