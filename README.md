@@ -31,3 +31,6 @@ STM32F4 Programs use cube ide
     - Created I2C-LCD driver using my I2C HAL
         - Control of backlight, cursor position, and character at each position
         - Higher-level functions that handle backlight, cursor, and characters to print messages to screen
+     
+- ### STM
+    - Interfaced with DAC and ADC using STM32 HAL to created proof of concepts of digital audio effects later used for digital guitar pedal project
