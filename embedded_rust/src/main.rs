@@ -1,40 +1,28 @@
 #![no_std]
 #![no_main]
 
-use core::ptr::write_volatile;
-
 use cortex_m::asm::nop;
 use panic_halt as _;
 use cortex_m_rt::entry;
+use stm32_metapac::{gpio::vals::{Odr, Moder}, GPIOA, RCC};
 // use rtt_target::{rtt_init_print, rprintln};
 #[entry]
 fn main() -> ! {
     // rtt_init_print!();
     // rprintln!("before loop");
-    const RCC_AHB1ENR: *mut u32 = 0x4002_3830 as *mut u32;
-    const RCC_AHB1ENR_GPIOA_EN: u32 = 0x1; 
-    const GPIOA_MODER: *mut u32 = 0x4002_0000 as *mut u32;
-    const GPIO_MODER5_POS: u8 = 10;
-    const GPIOA_BSSR: *mut u32 = 0x4002_0018 as *mut u32;
 
     // GPIO A initialization
-    unsafe {
-        write_volatile(RCC_AHB1ENR, *RCC_AHB1ENR | RCC_AHB1ENR_GPIOA_EN);
-        write_volatile(GPIOA_MODER, *GPIOA_MODER | (1 << GPIO_MODER5_POS));
-    }
-    let mut led_state = false;
+    RCC.ahb1enr().modify(|r| r.set_gpioaen(true));
+    GPIOA.moder().modify(|r| r.set_moder(5, Moder::OUTPUT));
 
     loop {
-        led_state = !led_state;
-
-        unsafe {
-            write_volatile(GPIOA_BSSR, *GPIOA_BSSR | (1 << 5) << match led_state {
-                true => 0,
-                false => 16,
-            });
+        if GPIOA.odr().read().odr(5) == Odr::HIGH {
+            GPIOA.bsrr().write(|r| r.set_br(5, true));
+        } else {
+            GPIOA.bsrr().write(|r| r.set_bs(5, true));
         }
 
-        for _ in 0..100_000 {
+        for _ in 0..1_000_000 {
             nop();
         }
     }
