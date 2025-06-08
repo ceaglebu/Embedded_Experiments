@@ -4,7 +4,8 @@
 use cortex_m::asm::nop;
 use panic_halt as _;
 use cortex_m_rt::entry;
-use stm32_metapac::{gpio::vals::{Odr, Moder}, GPIOA, RCC};
+use stm32f4xx_hal::{self as hal, gpio::GpioExt, hal::spi, spi::SpiExt};
+use hal::pac;
 // use rtt_target::{rtt_init_print, rprintln};
 #[entry]
 fn main() -> ! {
@@ -12,17 +13,16 @@ fn main() -> ! {
     // rprintln!("before loop");
 
     // GPIO A initialization
-    RCC.ahb1enr().modify(|r| r.set_gpioaen(true));
-    GPIOA.moder().modify(|r| r.set_moder(5, Moder::OUTPUT));
+    let p = pac::Peripherals::take().unwrap();
+    let gpioa = p.GPIOA.split();
+    let mut pa5 = gpioa.pa5.into_push_pull_output();
 
     loop {
-        if GPIOA.odr().read().odr(5) == Odr::HIGH {
-            GPIOA.bsrr().write(|r| r.set_br(5, true));
-        } else {
-            GPIOA.bsrr().write(|r| r.set_bs(5, true));
+        match pa5.is_set_high() {
+            true => pa5.set_low(),
+            false => pa5.set_high(),
         }
-
-        for _ in 0..1_000_000 {
+        for _ in 0..100_000 {
             nop();
         }
     }

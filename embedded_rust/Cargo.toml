@@ -8,4 +8,4 @@ cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
 cortex-m-rt = "0.7"
 panic-halt = "1.0.0"
 rtt-target = "0.6.1"
-stm32-metapac = { version = "16.0.0", features = ["stm32f446re"] }
+stm32f4xx-hal = { version = "0.22.1", features = ["stm32f446"] }
