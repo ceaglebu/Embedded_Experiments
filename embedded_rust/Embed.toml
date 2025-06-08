@@ -9,3 +9,6 @@ enabled = false
 
 [default.reset]
 halt_afterwards = false
+
+# [profile.release]
+# strip = "debuginfo"
