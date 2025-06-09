@@ -2,7 +2,7 @@
 chip = "STM32F446RE"
 
 [default.rtt]
-enabled = false
+enabled = true
 
 [default.gdb]
 enabled = false
@@ -10,5 +10,7 @@ enabled = false
 [default.reset]
 halt_afterwards = false
 
-# [profile.release]
-# strip = "debuginfo"
+[profile.release]
+debug = false
+lto = true
+opt-level = "s"
